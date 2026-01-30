@@ -2,6 +2,14 @@
 
 Contains utilities regarding Subnets, Ports, and IPs.
 
+> **Methods**
+> - [GetSubnet](#getsubnet)
+> - [IsIp](#isip)
+
+**Classes**
+> - [Port](#port)
+> - [Subnet](#subnet)
+
 ## GetSubnet
 Given an IP, returns a [Subnet](#subnet) if available.
 
@@ -39,15 +47,15 @@ if (!Networking.IsIp(ip)) {
 ## Port
 Represents an in-game port.
 
-**Properties:**
-- [external](#external)
-- [internal](#internal)
-- [service](#service)
-- [target](#target)
-- [version](#version)
+> **Properties:**
+> - [external](#external)
+> - [internal](#internal)
+> - [service](#service)
+> - [target](#target)
+> - [version](#version)
 
 ### external
-The externally open port (e.g. via the router)
+The externally open port number (e.g. via the router).
 
 **Definition:**
 ```js
@@ -89,7 +97,7 @@ println(line)
 ```
 
 ### service
-The service hosted on the port, if there is one available.
+The service listening on the given port number, if there is one available.
 
 **Definition:**
 ```js
@@ -111,7 +119,7 @@ println(line)
 
 ### target
 
-The internal IP address that the open port routes to (if forwarded).
+The internal IP address that the port number routes to.
 
 **Definition:**
 ```js
@@ -133,7 +141,7 @@ println(line)
 
 ### version
 
-The version of the service running on the port.
+The version of the service listening on the port number.
 
 **Definition:**
 ```js
@@ -163,6 +171,143 @@ const isOpen = (await subnet.PingPort(portNumber)) ? "OPEN" : "CLOSED";
 
 var line = `${isOpen}\t${port.external}\t${port.target}\t${port.internal}\t${port.service}\t${port.version}`
 println(line)
+```
+
+## Subnet
+Represents an in-game subnet.
+
+> **Methods:**
+> - [GetPortData](#getportdata)
+> - [GetPorts](#getports)
+> - [GetRouter](#getrouter)
+> - [PingPort](#pingport)
+
+> **Properties:**
+> - [ip](#ip)
+> - [lanIp](#lanip)
+
+### GetPortData
+Given a port number on a subnet, returns a [Port](#port).
+
+**Definition:**
+```js
+(method) Networking.Subnet.GetPortData(port: number): Promise<Networking.Port | null>
+```
+
+**Example usage:**
+```js
+for (const portNumber of portNumbers) {
+	println(`Scanning port: ${portNumber}...`);
+	
+	const port = await subnet.GetPortData(portNumber);
+	if (!port) {
+		println(`Error: Unable to access port ${portNumber}`);
+		continue;
+	}
+}
+```
+
+### GetPorts
+Get a list of all port numbers on a subnet.
+
+**Definition:**
+```js
+(method) Networking.Subnet.GetPorts(): Promise<number[]>
+```
+
+**Example usage:**
+```js
+const subnet = await Networking.GetSubnet(ip);
+if (!subnet) throw "Error: Unable to connect to subnet!";
+
+println("Fetching ports...");
+const portNumbers = await subnet.GetPorts();
+
+if (!portNumbers.length) throw "Error: No ports found!";
+
+println(`Available ports: ${portNumbers.join(", ")}`);
+```
+
+### GetRouter
+Returns the [subnet](#subnet) of the [subnet](#subnet)'s router.
+
+> NOTE: Untested, seems like a strange API? Could maybe test with large story network?
+
+**Definition:**
+```js
+(method) Networking.Subnet.GetRouter(): Promise<Networking.Subnet | undefined>
+```
+
+**Example usage:**
+```js
+// TODO: figure out a reasonable use case...
+// Perhaps something like this?
+const workstationSubnet = Networking.GetSubnet(workstationIp);
+const routerSubnet = workStationSubnet.GetRouter();
+println(`Router @ ${routerSubnet.ip} (${routerSubnet.lanIp})`)
+```
+
+### PingPort
+Check if a port is open or closed. Returns `true` if open.
+
+**Definition:**
+```js
+(method) Networking.Subnet.PingPort(port: number): Promise<boolean>
+```
+
+**Example usage:**
+```js
+for (const portNumber of portNumbers) {
+	println(`Scanning port: ${portNumber}...`);
+	
+	const port = await subnet.GetPortData(portNumber);
+	if (!port) {
+		println(`Error: Unable to access port ${portNumber}`);
+		continue;
+	}
+
+	const isOpen = await subnet.PingPort(portNumber);
+
+	println("===============");
+	println(`Port: ${portNumber}`);
+	println(`Status: ${isOpen ? "OPEN" : "CLOSED"}`);
+	if (port.service) println(`Service: ${port.service}`);
+	if (port.version) println(`Version: ${port.version}`);
+}
+```
+
+### ip
+The [subnet](#subnet)'s public IP address.
+
+**Definition:**
+```js
+(property) Networking.Subnet.ip: string
+```
+
+**Example usage:**
+```js
+println("Fetching subnet information...");
+const subnet = await Networking.GetSubnet(ip);
+if (!subnet) throw "Error: Failed to retrieve subnet information!";
+
+println(`Subnet: ${subnet.ip}/${subnet.lanIp}`);
+```
+
+### lanIp
+The [subnet](#subnet)'s LAN IP address.
+
+**Definition:**
+```js
+(property) Networking.Subnet.lanIp: string
+```
+
+**Example usage:**
+```js
+println("Fetching subnet information...");
+const subnet = await Networking.GetSubnet(ip);
+if (!subnet) throw "Error: Failed to retrieve subnet information!";
+
+println(`Subnet: ${subnet.ip}/${subnet.lanIp}`);
 ```
 
 # Metasploit
