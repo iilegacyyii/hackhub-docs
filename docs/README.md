@@ -242,8 +242,8 @@ Returns the [subnet](#subnet) of the [subnet](#subnet)'s router.
 ```js
 // TODO: figure out a reasonable use case...
 // Perhaps something like this?
-const workstationSubnet = Networking.GetSubnet(workstationIp);
-const routerSubnet = workStationSubnet.GetRouter();
+const workstationSubnet = await Networking.GetSubnet(workstationIp);
+const routerSubnet = await workStationSubnet.GetRouter();
 println(`Router @ ${routerSubnet.ip} (${routerSubnet.lanIp})`)
 ```
 
