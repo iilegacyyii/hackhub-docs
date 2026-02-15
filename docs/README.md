@@ -9,6 +9,7 @@ Library containing utilities regarding Subnets, Ports, and IPs.
 **Classes**
  - [Port](#port)
  - [Subnet](#subnet)
+ - [Wifi](#wifi)
 
 ## GetSubnet
 Given an IP, returns a [Subnet](#subnet) if available.
@@ -296,6 +297,110 @@ const subnet = await Networking.GetSubnet(ip);
 if (!subnet) throw "Error: Failed to retrieve subnet information!";
 
 println(`Subnet: ${subnet.ip}/${subnet.lanIp}`);
+```
+
+## Wifi
+
+Sub-library of [Networking](#networking) that allows you to search for and hack Wi-Fi networks.
+
+**Methods**
+ - [CaptureHandshake](#capturehandshake)
+ - [Deauth](#deauth)
+ - [GetInterfaces](#getinterfaces)
+ - [Scan](#scan)
+
+### CaptureHandshake
+
+Capture a WPA handshake and save it as a `.pcap` file.
+
+**Definition:**
+```js
+function Networking.Wifi.CaptureHandshake(interfaceName: string, bssid: string): Promise<string | null>
+```
+
+**Example usage:**
+```js
+const ifaces = await Networking.Wifi.GetInterfaces();
+const iface = ifaces.find(i => i.monitor);
+if (!iface || !iface.name) throw "No interface with monitor mode support found";
+
+const access_points = await Networking.Wifi.Scan("wlan0");
+const target_ap = access_points[0];
+
+const success = await Networking.Wifi.Deauth(iface.name, target_ap.bssid);
+if (!success) throw "Deauth failure!";
+
+const pcap = await Networking.Wifi.CaptureHandshake(iface.name, target_ap.bssid);
+if (!pcap) throw "No pcap...";
+
+const password = await Crypto.Hashcat.Decrypt(pcap);
+println(`password: ${password}`);
+```
+
+### Deauth
+
+Send de-authentication frames to a target [AccessPoint](#accesspoint). Do this before capturing a handshake.
+
+> Note: I am yet to test if sending multiple de-authentication packets is beneficial. Perhaps it increases the chance of success?
+
+**Definition:**
+```js
+function Networking.Wifi.Deauth(
+	interfaceName: string,
+	bssid: string,
+	options?: {packets?: number | undefined;} | undefined
+): Promise<boolean>
+```
+
+**Example usage:**
+```js
+const ifaces = await Networking.Wifi.GetInterfaces();
+const iface = ifaces.find(i => i.monitor);
+if (!iface || !iface.name) throw "No interface with monitor mode support found";
+
+const access_points = await Networking.Wifi.Scan("wlan0");
+const target_ap = access_points[0];
+
+const success = await Networking.Wifi.Deauth(iface.name, target_ap.bssid);
+```
+
+### GetInterfaces
+
+Get all [Interface](#interface)s on your device.
+
+**Definition:**
+```js
+function Networking.Wifi.GetInterfaces(): Promise<Networking.Wifi.Interface[]>
+```
+
+**Example usage:**
+```js
+const interfaces = await Networking.Wifi.GetInterfaces();
+
+interfaces.forEach(iface => {
+    println(iface.name);
+    println(`chipset      : ${iface.chipset}`);
+    println(`driver       : ${iface.driver}`);
+    println({text: `can monitor? : ${iface.monitor}`, color: iface.monitor ? 'green' : 'red'});
+    println(" ");
+});
+```
+
+### Scan
+
+List reachable [AccessPoint](#accesspoint)s given an [Interface](#interface) name.
+
+**Definition:**
+```js
+function Networking.Wifi.Scan(interfaceName: string): Promise<Networking.Wifi.AccessPoint[]>
+```
+
+**Example usage:**
+```js
+const networks = await Networking.Wifi.Scan("wlan0");
+for (const ap of networks) {
+	println(`${ap.ssid} | ${ap.bssid} | Ch: ${ap.channel} | Signal: ${ap.signal}`);
+}
 ```
 
 # Shell
