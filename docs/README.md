@@ -1,3 +1,88 @@
+# Crypto
+
+Library containing utilities regarding Password Cracking.
+
+**Namespaces**
+ - [Hash](#hash)
+ - [Hashcat](#hashcat)
+
+## Hash
+Sub-namespace of [Crypto](#crypto) containing general hashing and local encryption utilities.
+
+**Methods**
+ - [md5](#md5)
+ - [encrypt](#encrypt)
+ - [decrypt](#decrypt)
+
+### md5
+Generate an MD5 hash from a given string.
+
+**Definition:**
+```js
+function Crypto.Hash.md5(input: string): string
+```
+
+**Example usage:**
+```js
+const hash = Crypto.Hash.md5("hello world");
+```
+
+### encrypt
+Encrypt a password (stores mapping for later decryption).
+
+**Definition:**
+```js
+function Crypto.Hash.encrypt(input: string): string
+```
+
+**Example usage:**
+```js
+const encrypted = Crypto.Hash.encrypt("mypassword");
+```
+
+### decrypt
+Decrypt a previously encrypted hash.
+
+**Definition:**
+```js
+function Crypto.Hash.decrypt(hash: string): string | null
+```
+
+**Example usage:**
+```js
+const original = Crypto.Hash.decrypt(encrypted);
+println(original); // "mypassword"
+```
+
+## Hashcat
+Namespace used for cracking Wi-Fi network passwords from captured traffic.
+
+**Methods**
+ - [Decrypt](#decrypt-1)
+
+### Decrypt
+Decrypt a given `.pcap` file and return the cracked Wi-Fi password.
+
+**Definition:**
+```js
+function Crypto.Hashcat.Decrypt(path: string, options?: { cwd?: string, absolute?: boolean }): Promise<string | null>
+```
+
+**Example usage:**
+```js
+const password = await Crypto.Hashcat.Decrypt("capture.pcap");
+println(`Cracked: ${password}`);
+```
+
+**With path options:**
+```js
+// Resolve from a specific directory
+await Crypto.Hashcat.Decrypt("capture.pcap", { cwd: "downloads" });
+
+// Resolve from root
+await Crypto.Hashcat.Decrypt("capture.pcap", { absolute: true });
+```
+
 # Networking
 
 Library containing utilities regarding Subnets, Ports, and IPs.
