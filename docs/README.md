@@ -7,7 +7,7 @@ Library containing utilities regarding Password Cracking.
  - [Hashcat](#hashcat)
 
 ## Hash
-Namespace containing general hashing and local encryption utilities.
+Sub-namespace of [Crypto](#crypto) containing general hashing and local encryption utilities.
 
 **Methods**
  - [md5](#md5)
@@ -61,7 +61,7 @@ Namespace used for cracking Wi-Fi network passwords from captured traffic.
  - [Decrypt](#decrypt-1)
 
 ### Decrypt
-Decrypt a .pcap file and return the cracked Wi-Fi password.
+Decrypt a given `.pcap` file and return the cracked Wi-Fi password.
 
 **Definition:**
 ```js
